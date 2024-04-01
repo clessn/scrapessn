@@ -23,3 +23,50 @@ clean_url_to_id <- function(urls) {
   urls <- gsub("__", "_", urls)
   return(urls)
 }
+
+
+#' Fetch Closeness Matrix
+#'
+#' Retrieves and constructs a matrix representing the "closeness" of related items (such as artists, books, movies, or series)
+#' based on a specified base URL. It scrapes the names, URLs, and their closeness scores from the HTML content of the page.
+#'
+#' @param url_id A string representing the base URL of the item's page to scrape from.
+#' @return A square matrix where each row and column represents an item (artist, book, movie, or series),
+#'         and the cell values represent the closeness scores between each pair of items.
+#' @importFrom rvest read_html html_nodes html_text html_attr
+#' @importFrom magrittr '%>%'
+#' @importFrom stringr str_replace str_detect
+#' @examples
+#' url_id <- "http://some-base-url.com/item-name"
+#' closeness_matrix <- fetch_closeness_matrix(url_id)
+#' @export
+fetch_closeness_matrix <- function(item_url_id, base_url) {
+  url <- paste0(base_url, item_url_id)
+  # Fetch the HTML content from the page
+  page <- rvest::read_html(url)
+  # Extract relevant nodes and construct the dataframe
+  item_nodes <- rvest::html_nodes(page, "a.S")
+  n_items <- length(item_nodes)
+  items_df <- data.frame(names = rvest::html_text(item_nodes),
+                         urls = rvest::html_attr(item_nodes, "href"))
+  items_df$id <- clean_url_to_id(items_df$urls)
+  items_df$numeric_id_in_loop <- 0:(n_items - 1)
+  script_content <- page %>%
+    rvest::html_nodes("script") %>%
+    rvest::html_text()
+  content_as_string <- script_content[3]
+  # Initialize an empty matrix to store closeness scores
+  closeness_matrix <- matrix(NA, nrow = n_items, ncol = n_items,
+                             dimnames = list(items_df$urls, items_df$urls))
+  for (i in 0:(n_items - 1)){
+    idi <- artists_df$id[items_df$numeric_id_in_loop == i]
+    pattern <- paste0("Aid\\[", i, "\\]=new Array\\((.*?)\\);")
+    match <- regmatches(content_as_string, regexpr(pattern, content_as_string))[1]
+    num_string <- gsub(paste0("Aid\\[", i, "\\]=new Array\\(|\\);"), "", match)
+    numbers <- as.numeric(strsplit(num_string, ",")[[1]])
+    numbers[numbers == -1] <- NA
+    closeness_matrix[idi, ] <- numbers
+    message(paste(i, idi))
+  }
+  return(closeness_matrix)
+}
