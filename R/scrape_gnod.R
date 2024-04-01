@@ -59,7 +59,7 @@ fetch_closeness_matrix <- function(item_url_id, base_url) {
   closeness_matrix <- matrix(NA, nrow = n_items, ncol = n_items,
                              dimnames = list(items_df$urls, items_df$urls))
   for (i in 0:(n_items - 1)){
-    idi <- artists_df$id[items_df$numeric_id_in_loop == i]
+    idi <- items_df$id[items_df$numeric_id_in_loop == i]
     pattern <- paste0("Aid\\[", i, "\\]=new Array\\((.*?)\\);")
     match <- regmatches(content_as_string, regexpr(pattern, content_as_string))[1]
     num_string <- gsub(paste0("Aid\\[", i, "\\]=new Array\\(|\\);"), "", match)
