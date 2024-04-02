@@ -2,22 +2,33 @@
 % Please edit documentation in R/scrape_gnod.R
 \name{extract_gnod_closeness_df}
 \alias{extract_gnod_closeness_df}
-\title{Fetch Closeness Matrix}
+\title{Extract Gnod Closeness Data Frame}
 \usage{
 extract_gnod_closeness_df(page, item_url_id)
 }
 \arguments{
-\item{url_id}{A string representing the base URL of the item's page to scrape from.}
+\item{page}{An HTML document object representing the webpage to be processed. This should be obtained
+by calling the `fetch_webpage` function or similar `rvest::read_html` function calls.}
+
+\item{item_url_id}{A character string representing the specific item's URL identifier used to match
+and construct the closeness scores matrix. This is used to identify the base item in the closeness calculations.}
 }
 \value{
-A square matrix where each row and column represents an item (artist, book, movie, or series),
-        and the cell values represent the closeness scores between each pair of items.
+A data frame where each row represents the closeness score between the base item (specified by `item_url_id`)
+and another item. The data frame contains columns for the base item (`item_a`), the compared item (`item_b`),
+and their closeness score (`closeness`).
 }
 \description{
-Retrieves and constructs a matrix representing the "closeness" of related items (such as artists, books, movies, or series)
-based on a specified base URL. It scrapes the names, URLs, and their closeness scores from the HTML content of the page.
+Extracts and constructs a data frame representing the "closeness" of related items (such as artists, books, movies, or series)
+based on their interaction on the Gnod platform. It processes the HTML content to scrape names, URLs, and their closeness scores.
 }
 \examples{
-url_id <- "http://some-base-url.com/item-name"
-closeness_matrix <- fetch_closeness_matrix(url_id)
+\dontrun{
+base_url <- "https://www.gnoosic.com/faves.php"
+item_url_id <- "the+beatles"
+url <- paste0(base_url, item_url_id)
+page <- fetch_webpage(url)
+closeness_df <- extract_gnod_closeness_df(page, item_url_id)
+head(closeness_df)
+}
 }

@@ -1,32 +1,3 @@
-#' Clean URL to ID
-#'
-#' This function takes a vector of URLs as strings, cleans them by replacing specific characters with "_",
-#' decodes percentages and some specific characters, and removes special characters by replacing them
-#' with nothing to form clean identifiers. It is designed to convert URL slugs or query parameters into
-#' more readable or database-friendly IDs.
-#'
-#' @param urls A character vector of URLs to be cleaned.
-#' @return A character vector of cleaned IDs.
-#' @examples
-#' urls <- c("the+beatles", "queen", "pink+floyd", "simon+%26+garfunkel")
-#' clean_url_to_id(urls)
-#' @export
-#'
-#' @importFrom stringr str_replace_all
-clean_url_to_id <- function(urls) {
-  # Replace specific characters with "_"
-  urls <- gsub("\\+", "_", urls)
-  # Decode percentages and some specific characters
-  urls <- sapply(urls, URLdecode)
-  # Remove special characters and replace them with nothing
-  urls <- gsub("[%&/'\":]", "", urls)
-  urls <- gsub("__", "_", urls)
-  urls <- gsub("[^A-Za-z0-9_]", "", urls)
-  urls <- ifelse(grepl("^[0-9]+$", urls), paste0("i", urls), urls)
-  return(urls)
-}
-
-
 #' Extract Gnod Items Dataframe
 #'
 #' @description This function takes an HTML page as input and extracts
@@ -53,29 +24,40 @@ extract_gnod_items_df <- function(page, item_url_id){
   # Extract relevant nodes and construct the dataframe
   item_nodes <- rvest::html_nodes(page, "a.S")
   n_items <- length(item_nodes)
-  items_df <- data.frame(names = rvest::html_text(item_nodes),
-                         urls = rvest::html_attr(item_nodes, "href"))
-  items_df$urls[1] <- item_url_id
-  items_df$id <- clean_url_to_id(items_df$urls)
+  items_df <- data.frame(name = rvest::html_text(item_nodes),
+                         item_url_id = rvest::html_attr(item_nodes, "href"))
+  items_df$item_url_id[1] <- item_url_id
+  items_df$id <- clean_url_to_id(items_df$item_url_id)
   items_df$numeric_id_in_loop <- 0:(n_items - 1)
+  items_df <- items_df[, c("id", "name", "item_url_id", "numeric_id_in_loop")]
   return(items_df)
 }
 
 
-#' Fetch Closeness Matrix
+#' Extract Gnod Closeness Data Frame
 #'
-#' Retrieves and constructs a matrix representing the "closeness" of related items (such as artists, books, movies, or series)
-#' based on a specified base URL. It scrapes the names, URLs, and their closeness scores from the HTML content of the page.
+#' Extracts and constructs a data frame representing the "closeness" of related items (such as artists, books, movies, or series)
+#' based on their interaction on the Gnod platform. It processes the HTML content to scrape names, URLs, and their closeness scores.
 #'
-#' @param url_id A string representing the base URL of the item's page to scrape from.
-#' @return A square matrix where each row and column represents an item (artist, book, movie, or series),
-#'         and the cell values represent the closeness scores between each pair of items.
-#' @importFrom rvest read_html html_nodes html_text html_attr
+#' @param page An HTML document object representing the webpage to be processed. This should be obtained
+#' by calling the `fetch_webpage` function or similar `rvest::read_html` function calls.
+#' @param item_url_id A character string representing the specific item's URL identifier used to match
+#' and construct the closeness scores matrix. This is used to identify the base item in the closeness calculations.
+#' @return A data frame where each row represents the closeness score between the base item (specified by `item_url_id`)
+#' and another item. The data frame contains columns for the base item (`item_a`), the compared item (`item_b`),
+#' and their closeness score (`closeness`).
+#' @importFrom rvest html_nodes html_text html_attr
 #' @importFrom magrittr '%>%'
 #' @importFrom stringr str_replace str_detect
 #' @examples
-#' url_id <- "http://some-base-url.com/item-name"
-#' closeness_matrix <- fetch_closeness_matrix(url_id)
+#' \dontrun{
+#' base_url <- "https://www.gnoosic.com/faves.php"
+#' item_url_id <- "the+beatles"
+#' url <- paste0(base_url, item_url_id)
+#' page <- fetch_webpage(url)
+#' closeness_df <- extract_gnod_closeness_df(page, item_url_id)
+#' head(closeness_df)
+#' }
 #' @export
 extract_gnod_closeness_df <- function(page, item_url_id) {
   items_df <- extract_gnod_items_df(page, item_url_id)
