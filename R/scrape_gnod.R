@@ -65,8 +65,8 @@ fetch_closeness_df <- function(item_url_id, base_url) {
     num_string <- gsub(paste0("Aid\\[", i, "\\]=new Array\\(|\\);"), "", match)
     numbers <- as.numeric(strsplit(num_string, ",")[[1]])
     numbers[numbers == -1] <- NA
-    closeness_dfi <- data.frame(band_a = idi,
-                                band_b = items_df$id,
+    closeness_dfi <- data.frame(item_a = idi,
+                                item_b = items_df$id,
                                 closeness = numbers)
     if (i == 0){
       closeness_df <- closeness_dfi
@@ -77,3 +77,33 @@ fetch_closeness_df <- function(item_url_id, base_url) {
   }
   return(closeness_df)
 }
+
+
+#' Combine Gnod Closeness Data Frames
+#'
+#' Takes a base data frame and a new data frame containing Gnod closeness data,
+#' and combines them into a single data frame, removing any duplicate rows based
+#' on the pairs of items. This is useful for aggregating closeness data from
+#' multiple sources or for incremental updates.
+#'
+#' @param df_base A data frame serving as the base for combination.
+#' Expected to contain closeness data between items with columns `item_a`
+#' and `item_b` for the pair items, along with any closeness metrics.
+#' @param df_new A data frame with new closeness data to be added to `df_base`.
+#' Should have the same structure as `df_base`.
+#'
+#' @return A combined data frame with unique pairs of items based on `item_a`
+#' and `item_b`, including closeness metrics from both `df_base` and `df_new`.
+#'
+#' @examples
+#' # Assuming df_base and df_new are already defined data frames containing
+#' # Gnod closeness data
+#' combined_df <- combine_gnod_dfs(df_base, df_new)
+#'
+#' @export
+combine_gnod_dfs <- function(df_base, df_new) {
+  combined_df <- rbind(df_base, df_new) %>%
+    distinct(item_a, item_b, .keep_all = TRUE)
+  return(combined_df)
+}
+
