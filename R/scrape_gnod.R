@@ -83,6 +83,9 @@ extract_gnod_closeness_df <- function(page, item_url_id) {
     }
     message(paste(i, idi))
   }
+  if (all(is.na(closeness_df$closeness))) {
+    warning(paste0("The 'closeness' column is entirely composed of NA values for item:", item_url_id, "."))
+  }
   return(closeness_df)
 }
 
