@@ -27,6 +27,42 @@ clean_url_to_id <- function(urls) {
 }
 
 
+#' Extract Gnod Items Dataframe
+#'
+#' @description This function takes an HTML page as input and extracts
+#' relevant items from it, constructing a dataframe. It specifically
+#' looks for 'a.S' nodes within the page to gather names and URLs,
+#' and assigns IDs and numeric IDs in a loop for later use.
+#'
+#' @param page An HTML document object, which can be obtained by using
+#' `rvest::read_html()` on a URL. This is the page from which the
+#' data will be extracted.
+#' @return A dataframe containing the extracted items. Each row in the
+#' dataframe represents an item, with columns for item names, URLs,
+#' custom IDs, and numeric IDs within the loop.
+#' @examples
+#' \dontrun{
+#' url <- "https://www.gnoosic.com/faves.php"
+#' page <- rvest::read_html(url)
+#' items_df <- extract_gnod_items_df(page)
+#' print(items_df)
+#' }
+#' @export
+#' @importFrom rvest html_nodes html_text html_attr
+extract_gnod_items_df <- function(page){
+  # Extract relevant nodes and construct the dataframe
+  item_nodes <- rvest::html_nodes(page, "a.S")
+  n_items <- length(item_nodes)
+  items_df <- data.frame(names = rvest::html_text(item_nodes),
+                         urls = rvest::html_attr(item_nodes, "href"))
+  items_df$urls[1] <- item_url_id # Note: item_url_id needs to be defined or passed as a parameter
+  items_df$id <- clean_url_to_id(items_df$urls)
+  items_df$numeric_id_in_loop <- 0:(n_items - 1)
+  return(items_df)
+}
+
+
+
 #' Fetch Closeness Matrix
 #'
 #' Retrieves and constructs a matrix representing the "closeness" of related items (such as artists, books, movies, or series)
@@ -46,14 +82,7 @@ fetch_gnod_closeness_df <- function(item_url_id, base_url) {
   url <- paste0(base_url, item_url_id)
   # Fetch the HTML content from the page
   page <- rvest::read_html(url)
-  # Extract relevant nodes and construct the dataframe
-  item_nodes <- rvest::html_nodes(page, "a.S")
-  n_items <- length(item_nodes)
-  items_df <- data.frame(names = rvest::html_text(item_nodes),
-                         urls = rvest::html_attr(item_nodes, "href"))
-  items_df$urls[1] <- item_url_id
-  items_df$id <- clean_url_to_id(items_df$urls)
-  items_df$numeric_id_in_loop <- 0:(n_items - 1)
+  items_df <- extract_gnod_items_df(page)
   script_content <- page %>%
     rvest::html_nodes("script") %>%
     rvest::html_text()
@@ -106,4 +135,7 @@ combine_gnod_dfs <- function(df_base, df_new) {
     distinct(item_a, item_b, .keep_all = TRUE)
   return(combined_df)
 }
+
+
+
 
