@@ -4,7 +4,7 @@
 \alias{extract_gnod_items_df}
 \title{Extract Gnod Items Dataframe}
 \usage{
-extract_gnod_items_df(page)
+extract_gnod_items_df(page, item_url_id)
 }
 \arguments{
 \item{page}{An HTML document object, which can be obtained by using

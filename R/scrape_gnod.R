@@ -49,7 +49,7 @@ clean_url_to_id <- function(urls) {
 #' }
 #' @export
 #' @importFrom rvest html_nodes html_text html_attr
-extract_gnod_items_df <- function(page){
+extract_gnod_items_df <- function(page, item_url_id){
   # Extract relevant nodes and construct the dataframe
   item_nodes <- rvest::html_nodes(page, "a.S")
   n_items <- length(item_nodes)
@@ -82,7 +82,7 @@ fetch_gnod_closeness_df <- function(item_url_id, base_url) {
   url <- paste0(base_url, item_url_id)
   # Fetch the HTML content from the page
   page <- rvest::read_html(url)
-  items_df <- extract_gnod_items_df(page)
+  items_df <- extract_gnod_items_df(page, item_url_id)
   script_content <- page %>%
     rvest::html_nodes("script") %>%
     rvest::html_text()
