@@ -29,7 +29,20 @@ extract_gnod_items_df <- function(page, item_url_id){
   items_df$item_url_id[1] <- item_url_id
   items_df$id <- clean_url_to_id(items_df$item_url_id)
   items_df$numeric_id_in_loop <- 0:(n_items - 1)
-  items_df <- items_df[, c("id", "name", "item_url_id", "numeric_id_in_loop")]
+  script_content <- page %>%
+    rvest::html_nodes("script") %>%
+    rvest::html_text()
+  content_as_string <- script_content[which(substr(script_content, 1, 3) == "var")]
+  pattern <- "window\\.Pop=new Array\\((.*?)\\);"
+  matches <- regmatches(content_as_string, regexpr(pattern, content_as_string, perl = TRUE))
+  num_string <- regmatches(matches, gregexpr("\\d+", matches))
+  numbers <- as.numeric(unlist(num_string))
+  items_df$popularity <- numbers
+  items_df <- items_df[, c("id", "name", "item_url_id", "popularity", "numeric_id_in_loop")]
+  script_content <- page %>%
+    rvest::html_nodes("script") %>%
+    rvest::html_text()
+  content_as_string <- script_content[which(substr(script_content, 1, 3) == "var")]
   return(items_df)
 }
 

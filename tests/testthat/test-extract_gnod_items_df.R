@@ -7,7 +7,7 @@ test_that("extract_gnod_items_df extracts expected data frame", {
 
   # Test the structure of the returned dataframe
   expect_true(is.data.frame(test_df))
-  expect_equal(names(test_df), c("id", "name", "item_url_id", "numeric_id_in_loop"))
+  expect_equal(names(test_df), c("id", "name", "item_url_id", "popularity", "numeric_id_in_loop"))
 
   # More specific tests can include checking the contents of the dataframe
   # This depends on the mock HTML content you use for testing
