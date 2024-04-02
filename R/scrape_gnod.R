@@ -43,6 +43,7 @@ extract_gnod_items_df <- function(page, item_url_id){
 #' by calling the `fetch_webpage` function or similar `rvest::read_html` function calls.
 #' @param item_url_id A character string representing the specific item's URL identifier used to match
 #' and construct the closeness scores matrix. This is used to identify the base item in the closeness calculations.
+#' @param verbose A logical value indicating whether to display progress messages while processing the closeness data.
 #' @return A data frame where each row represents the closeness score between the base item (specified by `item_url_id`)
 #' and another item. The data frame contains columns for the base item (`item_a`), the compared item (`item_b`),
 #' and their closeness score (`closeness`).
@@ -59,7 +60,7 @@ extract_gnod_items_df <- function(page, item_url_id){
 #' head(closeness_df)
 #' }
 #' @export
-extract_gnod_closeness_df <- function(page, item_url_id) {
+extract_gnod_closeness_df <- function(page, item_url_id, verbose = TRUE) {
   items_df <- extract_gnod_items_df(page, item_url_id)
   n_items <- nrow(items_df)
   script_content <- page %>%
@@ -81,7 +82,7 @@ extract_gnod_closeness_df <- function(page, item_url_id) {
     } else {
       closeness_df <- rbind(closeness_df, closeness_dfi)
     }
-    message(paste(i, idi))
+    if (verbose) message(paste(i, idi))
   }
   if (all(is.na(closeness_df$closeness))) {
     warning(paste0("The 'closeness' column is entirely composed of NA values for item:", item_url_id, "."))

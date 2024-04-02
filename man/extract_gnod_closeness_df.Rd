@@ -4,7 +4,7 @@
 \alias{extract_gnod_closeness_df}
 \title{Extract Gnod Closeness Data Frame}
 \usage{
-extract_gnod_closeness_df(page, item_url_id)
+extract_gnod_closeness_df(page, item_url_id, verbose = TRUE)
 }
 \arguments{
 \item{page}{An HTML document object representing the webpage to be processed. This should be obtained
@@ -12,6 +12,8 @@ by calling the `fetch_webpage` function or similar `rvest::read_html` function c
 
 \item{item_url_id}{A character string representing the specific item's URL identifier used to match
 and construct the closeness scores matrix. This is used to identify the base item in the closeness calculations.}
+
+\item{verbose}{A logical value indicating whether to display progress messages while processing the closeness data.}
 }
 \value{
 A data frame where each row represents the closeness score between the base item (specified by `item_url_id`)
