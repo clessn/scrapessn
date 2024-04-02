@@ -68,12 +68,12 @@ fetch_closeness_df <- function(item_url_id, base_url) {
     closeness_dfi <- data.frame(band_a = idi,
                                 band_b = items_df$id,
                                 closeness = numbers)
+    if (i == 0){
+      closeness_df <- closeness_dfi
+    } else {
+      closeness_df <- rbind(closeness_df, closeness_dfi)
+    }
     message(paste(i, idi))
-  }
-  if (i == 0){
-    closeness_df <- closeness_dfi
-  } else {
-    closeness_df <- rbind(closeness_df, closeness_dfi)
   }
   return(closeness_df)
 }
