@@ -61,7 +61,7 @@ extract_gnod_items_df <- function(page, item_url_id){
 #' @export
 extract_gnod_closeness_df <- function(page, item_url_id) {
   items_df <- extract_gnod_items_df(page, item_url_id)
-  n_items <- nrows(items_df)
+  n_items <- nrow(items_df)
   script_content <- page %>%
     rvest::html_nodes("script") %>%
     rvest::html_text()
@@ -111,7 +111,7 @@ extract_gnod_closeness_df <- function(page, item_url_id) {
 #' @export
 combine_gnod_dfs <- function(df_base, df_new) {
   combined_df <- rbind(df_base, df_new) %>%
-    distinct(item_a, item_b, .keep_all = TRUE)
+    dplyr::distinct(item_a, item_b, .keep_all = TRUE)
   return(combined_df)
 }
 
