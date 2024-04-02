@@ -21,7 +21,8 @@ clean_url_to_id <- function(urls) {
   # Remove special characters and replace them with nothing
   urls <- gsub("[%&/'\":]", "", urls)
   urls <- gsub("__", "_", urls)
-  urls <- gsub("[^A-Za-z_]", "", urls)
+  urls <- gsub("[^A-Za-z0-9_]", "", urls)
+  urls <- ifelse(grepl("^[0-9]+$", urls), paste0("i", urls), urls)
   return(urls)
 }
 
