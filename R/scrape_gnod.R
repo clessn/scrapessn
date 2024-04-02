@@ -65,7 +65,7 @@ extract_gnod_closeness_df <- function(page, item_url_id) {
   script_content <- page %>%
     rvest::html_nodes("script") %>%
     rvest::html_text()
-  content_as_string <- script_content[3]
+  content_as_string <- script_content[which(substr(script_content, 1, 3) == "var")]
   for (i in 0:(n_items - 1)){
     idi <- items_df$id[items_df$numeric_id_in_loop == i]
     pattern <- paste0("Aid\\[", i, "\\]=new Array\\((.*?)\\);")
