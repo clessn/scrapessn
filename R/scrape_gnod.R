@@ -42,7 +42,7 @@ clean_url_to_id <- function(urls) {
 #' url_id <- "http://some-base-url.com/item-name"
 #' closeness_matrix <- fetch_closeness_matrix(url_id)
 #' @export
-fetch_closeness_matrix <- function(item_url_id, base_url) {
+fetch_closeness_df <- function(item_url_id, base_url) {
   url <- paste0(base_url, item_url_id)
   # Fetch the HTML content from the page
   page <- rvest::read_html(url)
@@ -58,10 +58,6 @@ fetch_closeness_matrix <- function(item_url_id, base_url) {
     rvest::html_nodes("script") %>%
     rvest::html_text()
   content_as_string <- script_content[3]
-  # Initialize an empty matrix to store closeness scores
-  closeness_matrix <- matrix(NA, nrow = n_items, ncol = n_items,
-                             dimnames = list(items_df$id,
-                                             items_df$id))
   for (i in 0:(n_items - 1)){
     idi <- items_df$id[items_df$numeric_id_in_loop == i]
     pattern <- paste0("Aid\\[", i, "\\]=new Array\\((.*?)\\);")
@@ -69,8 +65,15 @@ fetch_closeness_matrix <- function(item_url_id, base_url) {
     num_string <- gsub(paste0("Aid\\[", i, "\\]=new Array\\(|\\);"), "", match)
     numbers <- as.numeric(strsplit(num_string, ",")[[1]])
     numbers[numbers == -1] <- NA
-    closeness_matrix[idi, ] <- numbers
+    closeness_dfi <- data.frame(band_a = idi,
+                                band_b = items_df$id,
+                                closeness = numbers)
     message(paste(i, idi))
+  }
+  if (i == 0){
+    closeness_df <- closeness_dfi
+  } else {
+    closeness_df <- rbind(closeness_df, closeness_dfi)
   }
   return(closeness_matrix)
 }
