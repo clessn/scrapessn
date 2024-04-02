@@ -55,12 +55,11 @@ extract_gnod_items_df <- function(page, item_url_id){
   n_items <- length(item_nodes)
   items_df <- data.frame(names = rvest::html_text(item_nodes),
                          urls = rvest::html_attr(item_nodes, "href"))
-  items_df$urls[1] <- item_url_id # Note: item_url_id needs to be defined or passed as a parameter
+  items_df$urls[1] <- item_url_id
   items_df$id <- clean_url_to_id(items_df$urls)
   items_df$numeric_id_in_loop <- 0:(n_items - 1)
   return(items_df)
 }
-
 
 
 #' Fetch Closeness Matrix
@@ -78,11 +77,9 @@ extract_gnod_items_df <- function(page, item_url_id){
 #' url_id <- "http://some-base-url.com/item-name"
 #' closeness_matrix <- fetch_closeness_matrix(url_id)
 #' @export
-fetch_gnod_closeness_df <- function(item_url_id, base_url) {
-  url <- paste0(base_url, item_url_id)
-  # Fetch the HTML content from the page
-  page <- rvest::read_html(url)
+extract_gnod_closeness_df <- function(page, item_url_id) {
   items_df <- extract_gnod_items_df(page, item_url_id)
+  n_items <- nrows(items_df)
   script_content <- page %>%
     rvest::html_nodes("script") %>%
     rvest::html_text()
