@@ -42,7 +42,7 @@ clean_url_to_id <- function(urls) {
 #' url_id <- "http://some-base-url.com/item-name"
 #' closeness_matrix <- fetch_closeness_matrix(url_id)
 #' @export
-fetch_closeness_df <- function(item_url_id, base_url) {
+fetch_gnod_closeness_df <- function(item_url_id, base_url) {
   url <- paste0(base_url, item_url_id)
   # Fetch the HTML content from the page
   page <- rvest::read_html(url)
