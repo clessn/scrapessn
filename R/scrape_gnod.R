@@ -49,6 +49,7 @@ fetch_closeness_matrix <- function(item_url_id, base_url) {
   n_items <- length(item_nodes)
   items_df <- data.frame(names = rvest::html_text(item_nodes),
                          urls = rvest::html_attr(item_nodes, "href"))
+  items_df$urls[1] <- item_url_id
   items_df$id <- clean_url_to_id(items_df$urls)
   items_df$numeric_id_in_loop <- 0:(n_items - 1)
   script_content <- page %>%
@@ -57,7 +58,8 @@ fetch_closeness_matrix <- function(item_url_id, base_url) {
   content_as_string <- script_content[3]
   # Initialize an empty matrix to store closeness scores
   closeness_matrix <- matrix(NA, nrow = n_items, ncol = n_items,
-                             dimnames = list(items_df$urls, items_df$urls))
+                             dimnames = list(items_df$id,
+                                             items_df$id))
   for (i in 0:(n_items - 1)){
     idi <- items_df$id[items_df$numeric_id_in_loop == i]
     pattern <- paste0("Aid\\[", i, "\\]=new Array\\((.*?)\\);")
