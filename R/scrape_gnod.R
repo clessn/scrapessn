@@ -75,5 +75,5 @@ fetch_closeness_df <- function(item_url_id, base_url) {
   } else {
     closeness_df <- rbind(closeness_df, closeness_dfi)
   }
-  return(closeness_matrix)
+  return(closeness_df)
 }
