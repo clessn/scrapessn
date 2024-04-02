@@ -4,7 +4,13 @@
 \alias{fetch_webpage}
 \title{Fetch Webpage Content}
 \usage{
-fetch_webpage(base_url, item_url_id = NULL)
+fetch_webpage(
+  base_url,
+  item_url_id = NULL,
+  retry_on_fail = FALSE,
+  max_attempts = 10,
+  sleep_seconds = 1
+)
 }
 \arguments{
 \item{base_url}{A character string specifying the base URL of the website.}
@@ -12,6 +18,13 @@ fetch_webpage(base_url, item_url_id = NULL)
 \item{item_url_id}{An optional character string specifying the specific item's URL identifier
 to be appended to the base URL for constructing the full URL. Default is NULL, indicating that
 only the base URL is used.}
+
+\item{retry_on_fail}{A logical value indicating whether to retry fetching the webpage if the
+initial attempt fails. Default is FALSE.}
+
+\item{max_attempts}{Integer, the maximum number of retry attempts. Default is 10.}
+
+\item{sleep_seconds}{Integer, number of seconds to wait between retry attempts. Default is 1.}
 }
 \value{
 An HTML document object representing the fetched webpage. This object can be further
@@ -21,16 +34,18 @@ processed using various `rvest` functions to extract specific data.
 Fetches the HTML content of a webpage. It constructs the URL by optionally appending
 an item URL identifier to a base URL, and then uses `rvest::read_html()` to download and parse
 the HTML content of the page. If the item URL identifier is not provided, it fetches the base URL.
+Optionally retries fetching the page if the first attempt fails.
 }
 \examples{
 \dontrun{
 base_url <- "https://www.example.com"
 item_url_id <- "page.html"
-page <- fetch_webpage(base_url, item_url_id)
+# Fetching with retry on fail
+page <- fetch_webpage(base_url, item_url_id, retry_on_fail = TRUE)
 print(page)
 
-# Fetching content from the base URL only
-page_base <- fetch_webpage(base_url)
+# Fetching content from the base URL only, without retry
+page_base <- fetch_webpage(base_url, retry_on_fail = FALSE)
 print(page_base)
 }
 }
