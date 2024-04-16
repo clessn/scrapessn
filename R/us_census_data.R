@@ -79,8 +79,8 @@ get_datagotchi_usa_population_data <- function(geo_division){
     variables = variables_base,
     year = 2022) %>%
     tidyr::separate(variable, into = c("variable", "category"), sep = "\\.") %>%
-    group_by(GEOID, NAME, variable) %>%
-    mutate(prop = estimate / sum(estimate)) %>%
+    dplyr::group_by(GEOID, NAME, variable) %>%
+    dplyr::mutate(prop = estimate / sum(estimate)) %>%
     dplyr::select(GEOID, NAME, variable, category, prop)
   ### variables where the variable is only available by sex
   df_by_geodiv_sex_prop <- tidycensus::get_acs(
@@ -89,8 +89,8 @@ get_datagotchi_usa_population_data <- function(geo_division){
       m = "DP02_0025P",
       f = "DP02_0031P"
     )) %>%
-    group_by(GEOID) %>%
-    mutate(total = sum(estimate),
+    dplyr::group_by(GEOID) %>%
+    dplyr::mutate(total = sum(estimate),
            prop_sex = estimate / total) %>%
     dplyr::select(GEOID, sex = variable, prop_sex)
   df_ses_marriage <- tidycensus::get_acs(
@@ -110,11 +110,11 @@ get_datagotchi_usa_population_data <- function(geo_division){
       ses_marriage.divorced.m = "DP02_0028P"
     )) %>%
     tidyr::separate(variable, into = c("variable", "category", "sex"), sep = "\\.") %>%
-    left_join(df_by_geodiv_sex_prop, by = c("GEOID", "sex")) %>%
-    mutate(estimate = estimate / 100,
+    dplyr::left_join(df_by_geodiv_sex_prop, by = c("GEOID", "sex")) %>%
+    dplyr::mutate(estimate = estimate / 100,
            prop_state = estimate * prop_sex) %>%
-    group_by(GEOID, NAME, variable, category) %>%
-    summarise(prop = sum(prop_state))
+    dplyr::group_by(GEOID, NAME, variable, category) %>%
+    dplyr::summarise(prop = sum(prop_state))
   df_by_geodiv_total <- tidycensus::get_acs(
     geography = geo_division,
     variables = c(
@@ -126,9 +126,9 @@ get_datagotchi_usa_population_data <- function(geo_division){
     variables = variables_continent,
     year = 2022) %>%
     tidyr::separate(variable, into = c("variable", "category"), sep = "\\.") %>%
-    left_join(., df_by_geodiv_total, by = "GEOID") %>%
-    mutate(prop = estimate / total) %>%
+    dplyr::left_join(., df_by_geodiv_total, by = "GEOID") %>%
+    dplyr::mutate(prop = estimate / total) %>%
     dplyr::select(GEOID, NAME, variable, category, prop)
-  df <- bind_rows(df_base, df_ses_marriage, df_continent_born)
+  df <- rbind(df_base, df_ses_marriage, df_continent_born)
   return(df)
 }
