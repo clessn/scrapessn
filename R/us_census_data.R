@@ -81,7 +81,7 @@ get_datagotchi_usa_population_data <- function(geo_division){
     tidyr::separate(variable, into = c("variable", "category"), sep = "\\.") %>%
     group_by(GEOID, NAME, variable) %>%
     mutate(prop = estimate / sum(estimate)) %>%
-    select(GEOID, NAME, variable, category, prop)
+    dplyr::select(GEOID, NAME, variable, category, prop)
   ### variables where the variable is only available by sex
   df_by_geodiv_sex_prop <- tidycensus::get_acs(
     geography = geo_division,
@@ -92,7 +92,7 @@ get_datagotchi_usa_population_data <- function(geo_division){
     group_by(GEOID) %>%
     mutate(total = sum(estimate),
            prop_sex = estimate / total) %>%
-    select(GEOID, sex = variable, prop_sex)
+    dplyr::select(GEOID, sex = variable, prop_sex)
   df_ses_marriage <- tidycensus::get_acs(
     geography = geo_division,
     variables = c(
@@ -120,7 +120,7 @@ get_datagotchi_usa_population_data <- function(geo_division){
     variables = c(
       total = "DP02_0088"
     )) %>%
-    select(GEOID, total = estimate)
+    dplyr::select(GEOID, total = estimate)
   df_continent_born <- tidycensus::get_acs(
     geography = geo_division,
     variables = variables_continent,
@@ -128,7 +128,7 @@ get_datagotchi_usa_population_data <- function(geo_division){
     tidyr::separate(variable, into = c("variable", "category"), sep = "\\.") %>%
     left_join(., df_by_geodiv_total, by = "GEOID") %>%
     mutate(prop = estimate / total) %>%
-    select(GEOID, NAME, variable, category, prop)
+    dplyr::select(GEOID, NAME, variable, category, prop)
   df <- bind_rows(df_base, df_ses_marriage, df_continent_born)
   return(df)
 }
